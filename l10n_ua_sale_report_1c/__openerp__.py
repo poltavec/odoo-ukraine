@@ -19,6 +19,7 @@
     'auto_install': False,
     'demo': [],
     'data': [
+            'views/sale_order_view.xml',
             'views/report_saleorder.xml',
             'data/sale_report.xml'
         ],

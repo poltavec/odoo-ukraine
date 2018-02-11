@@ -2,12 +2,22 @@
 <odoo>
     <data>
         <report
-            string="Расходная накладная"
+            string="Счет на оплату"
             id="action_report_sale_order_ua"
             model="sale.order"
             report_type="qweb-pdf"
             name="l10n_ua_sale_report_1c.report_sale_order_ua_1c"
             file="l10n_ua_sale_report_1c.report_sale_order_ua_1c"
         />
+
+        <report
+            string="Акт виконаних рабіт"
+            id="action_report_sale_order_act_ua"
+            model="sale.order"
+            report_type="qweb-pdf"
+            name="l10n_ua_sale_report_1c.report_sale_order_act_ua_1c"
+            file="l10n_ua_sale_report_1c.report_sale_order_act_ua_1c"
+        />
+
     </data>
 </odoo>
