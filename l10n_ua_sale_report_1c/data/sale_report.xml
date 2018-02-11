@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <report
-            string="Счет на оплату"
+            string="Видаткова накладна"
             id="action_report_sale_order_ua"
             model="sale.order"
             report_type="qweb-pdf"
