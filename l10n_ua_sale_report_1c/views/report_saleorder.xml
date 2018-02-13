@@ -155,6 +155,15 @@
                         </div>
                     </div>
 
+                    <t t-set="sum_text" t-value="doc.format_sum_to_text(doc.amount_total)"/>
+                    <t t-set="lines_count" t-value="len(doc.order_line)"/>
+                    <t t-set="vat_text" t-value="doc.format_sum_to_text(doc.amount_tax)"/>
+
+                    <p>Всього найменувань <t t-esc="lines_count"/>, на суму <span t-field="doc.amount_total" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></p>
+                    <p class="capitalize"><b><span t-esc="sum_text"/></b></p>
+                    <p><b>У т.ч. ПДВ: <span t-esc="vat_text"/></b></p>
+
+
                     <p t-field="doc.note" />
                     <p t-if="doc.payment_term_id.note">
                         <span t-field="doc.payment_term_id.note"/>
@@ -345,6 +354,15 @@
                                 </div>
                             </div>
 
+                            <t t-set="sum_text" t-value="doc.format_sum_to_text(doc.amount_total)"/>
+                            <t t-set="lines_count" t-value="len(doc.order_line)"/>
+                            <t t-set="vat_text" t-value="doc.format_sum_to_text(doc.amount_tax)"/>
+
+                            <p>Всього найменувань <t t-esc="lines_count"/>, на суму <span t-field="doc.amount_total" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/><br/>
+                            <b><span t-esc="sum_text"/></b><br/>
+                                <b>У т.ч. ПДВ: <span t-esc="vat_text"/></b>
+                            </p>
+
                             <p t-field="doc.note"/>
                             <p t-if="doc.payment_term_id.note">
                                 <span t-field="doc.payment_term_id.note"/>
@@ -359,40 +377,61 @@
                                 </div>
                             </div>
                             <div class="oe_structure"/>
-                            <hr class="fat"></hr>
-                            <!-- TODO: add bank info for each company-->
+
                             <div class="row mt32">
-                                <div class="col-xs-4 col-xs-offset-2">
-                                    <span>Від виконавця:</span><br/><br/>
+                                <div class="col-xs-5">
+                                    <span>Від виконавця:</span><br/>
                                     <span t-if="doc.company_id">
                                         <strong>
                                             <p t-field="doc.company_id.name"/>
                                         </strong>
                                     </span>
-                                    <span t-if="not doc.company_id">______________________________</span><br/>
-                                    <span t-field="doc.date_order" t-field-options='{"format":"d.MM.Y"}'/><br/><br/>
+                                    <span t-if="not doc.company_id">______________________________</span>
+                                    <span t-field="doc.date_order" t-field-options='{"format":"d.MM.Y"}'/><br/>
                                     <address t-field="doc.company_id.partner_id"
-                                             t-field-options='{"widget": "contact", "fields": ["address", "phone"], "no_marker": true, "phone_icons": true}'/><br/>
-                                    <span t-if="doc.company_id.company_registry">ЄДРПОУ <span t-field="doc.company_id.company_registry"/><br/></span>
-                                    <span t-if="doc.company_id.vat">ІПН <span t-field="doc.company_id.vat"/><br/></span>
+                                             t-field-options='{"widget": "contact", "fields": ["address", "phone"], "no_marker": true, "phone_icons": true}'/>
+                                    <span t-if="doc.company_id.company_registry">ЄДРПОУ <span t-field="doc.company_id.company_registry"/>; </span>
+                                    <span t-if="doc.company_id.vat">ІПН <span t-field="doc.company_id.vat"/>; </span>
                                     <span t-if="'property_account_position_id' in doc.company_id.partner_id.fields_get() and doc.company_id.partner_id.property_account_position_id.note"
                                           t-field="doc.company_id.partner_id.property_account_position_id.note"/>
-
+                                    <t t-if="doc.company_id.bank_ids">
+                                        <t t-set="b" t-value="doc.company_id.bank_ids[0]"/>
+                                        <p>п\р
+                                            <span t-field="b.acc_number"/>
+                                            у <span t-field="b.bank_name"/>,
+                                            <t t-if="b.bank_id.bic">МФО
+                                                <span t-field="b.bank_id.bic"/>
+                                            </t>
+                                        </p>
+                                    </t>
+                                    <p>____________________  <t t-if="doc.user_id"><strong t-field="doc.user_id"/></t><t t-if="not doc.user_id">_____________</t></p>
+                                    <p>           М.П.</p>
                                 </div>
 
-                                <div t-if="doc.state not in ['draft','sent']" class="col-xs-4 col-xs-offset-2">
-                                    <span>Від замовника:</span><br/><br/>
-                                    <b><p t-field="doc.partner_id"/></b><br/>
-                                    <span t-field="doc.date_order" t-field-options='{"format":"d.MM.Y"}'/><br/><br/>
+                                <div t-if="doc.state not in ['draft','sent']" class="col-xs-5 col-xs-offset-2">
+                                    <span>Від замовника:</span><br/>
+                                    <b><p t-field="doc.partner_id"/></b>
+                                    <span t-field="doc.date_order" t-field-options='{"format":"d.MM.Y"}'/><br/>
                                     <address t-field="doc.partner_id"
-                                             t-field-options='{"widget": "contact", "fields": ["address", "phone"], "no_marker": true, "phone_icons": true}'/><br/>
-                                    <span t-if="'company_registry' in doc.partner_id.fields_get() and doc.partner_id.company_registry">
-                                        ЄДРПОУ <span t-field="doc.partner_id.company_registry"></span><br/>
+                                             t-field-options='{"widget": "contact", "fields": ["address", "phone"], "no_marker": true, "phone_icons": true}'/>
+                                    <p><span t-if="'company_registry' in doc.partner_id.fields_get() and doc.partner_id.company_registry">
+                                        ЄДРПОУ <span t-field="doc.partner_id.company_registry"></span>;
                                     </span>
-                                    <span t-if="doc.partner_id.vat">ІПН <span t-field="doc.company_id.vat"/><br/></span>
+                                    <t t-if="doc.partner_id.bank_ids">
+                                        <t t-set="bp" t-value="doc.partner_id.bank_ids[0]"/>
+                                        п\р
+                                            <span t-field="bp.acc_number"/>
+                                            у <span t-field="bp.bank_name"/>,
+                                            <t t-if="bp.bank_id.bic">МФО
+                                                <span t-field="bp.bank_id.bic"/>
+                                            </t><br/>
+                                    </t>
+                                        <span t-if="doc.partner_id.vat">ІПН <span t-field="doc.company_id.vat"/></span></p>
                                     <span t-if="doc.fiscal_position_id" t-field="doc.fiscal_position_id.note"/>
                                     <span t-if="not doc.fiscal_position_id and 'property_account_position_id' in doc.partner_id.fields_get() and doc.partner_id.property_account_position_id.note"
                                           t-field="doc.partner_id.property_account_position_id.note"/>
+                                    <p>_____________________  ______________</p>
+                                    <p>           М.П.</p>
                                 </div>
                             </div>
                         </div>

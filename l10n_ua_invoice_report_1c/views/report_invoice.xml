@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_ua_1c_document">
+            <t t-call="report.external_layout">
+                <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})"/>
+                 <style>
+                    .fat { border-width:2px; border-color:#0b0b0b; }
+                     .capitalize:first-letter {text-transform:uppercase}
+                    #products th:first-child, #products td:first-child {width:5%; min-width:30px;
+                    text-align:center }
+                    #products th:nth-child(2),#products td:nth-child(2) {width:10%}
+                    #products th:nth-child(3), #products td:nth-child(3) {width:32%}
+                    #products th:nth-child(4), #products td:nth-child(4) {width:8%}
+                    #products th:nth-child(5),#products td:nth-child(5) {width:9%}
+                    #products th:nth-child(6), #products td:nth-child(6) {width:10%}
+                    #products th:nth-child(7), #products td:nth-child(7) {width:10%}
+                    #products th:nth-child(8), #products td:nth-child(8) {width:13%}
+                </style>
+
+                <div class="page">
+                    <div class="row">
+
+                        <div class="col-xs-2">
+                            <u>Постачальник:</u>
+                        </div>
+                        <div class="col-xs-8">
+                            <strong t-field="o.company_id.name"></strong><br/>
+                            <p>ЄДРПОУ <span t-field="o.company_id.company_registry"/>, тел. <span t-field="o.company_id.phone"/><br/>
+                            <t t-if="o.company_id.bank_ids">
+                                <t t-set="b" t-value="o.company_id.bank_ids[0]"/>
+                                п\р <span t-field="b.acc_number"/> у <span t-field="b.bank_name"/>, <t t-if="b.bank_id.bic">МФО <span t-field="b.bank_id.bic"/></t>
+                            </t><br/>
+                             <span t-if="'property_account_position_id' in o.company_id.partner_id.fields_get() and o.company_id.partner_id.property_account_position_id.note"
+                                          t-field="o.company_id.partner_id.property_account_position_id.note"/></p>
+                            <p t-field="o.company_id.partner_id"
+                                t-field-options='{"widget": "contact", "fields": ["address"], "no_marker": true}' />
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <u>Одержувач:</u>
+                        </div>
+                        <div class="col-xs-8">
+                            <div t-field="o.partner_id"
+                                t-field-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": true}' />
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <u>Платник:</u>
+                        </div>
+                        <div class="col-xs-8">
+                               той самий
+                        </div>
+                    </div>
+                    <br/>
+                    <div t-if="o.origin" class="row">
+                        <div class="col-xs-2">
+                            <strong>Замовлення:</strong>
+                        </div>
+                        <div class="col-xs-8">
+                            <p t-field="o.origin"/>
+                        </div>
+                    </div>
+
+                    <h2 style="text-align:center">
+                        <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Рахунок-фактура</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">PRO-FORMA</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'draft'">Чорновий рахунок</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">Скасований рахунок</span>
+                        <span t-if="o.type == 'out_refund'">Рахунок на повернення</span>
+                        <span t-if="o.type == 'in_refund'">Рахунок постачальника на повернення</span>
+                        <span t-if="o.type == 'in_invoice'">Рахунок постачальника</span>
+                        <span t-field="o.number"/>
+                    </h2>
+                    <p style="text-align:center;font-size:14px">від <span t-field="o.date_invoice"/> р.</p>
+
+                    <!-- Is there a discount on at least one line? -->
+                    <t t-set="display_discount" t-value="any([l.discount for l in o.invoice_line_ids])"/>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Назва</th>
+                                <th class="hidden">Source Document</th>
+                                <th class="text-right">К-сть</th>
+                                <th class="text-right">Од.вим.</th>
+                                <th class="text-right">Ціна</th>
+                                <th t-if="display_discount" class="text-right">Знижка</th>
+                                <th class="text-right">Сумма без ПДВ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="invoice_tbody">
+                            <tr t-foreach="o.invoice_line_ids" t-as="l">
+                                <td>
+                                    <span t-field="l.name"/>
+                                </td>
+                                <td class="hidden">
+                                    <span t-field="l.origin"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="l.quantity"/>
+                                </td>
+                                <td><span t-field="l.uom_id" groups="product.group_uom"/></td>
+                                <td class="text-right">
+                                    <span t-field="l.price_unit"/>
+                                </td>
+                                <td t-if="display_discount" class="text-right">
+                                    <span t-field="l.discount"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="l.price_subtotal"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-xs-4 pull-right">
+                            <table class="table table-condensed">
+                                <tr class="border-black">
+                                    <td>
+                                        <strong>Сума</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_untaxed"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <t t-foreach="o._get_tax_amount_by_group()" t-as="amount_by_group">
+                                    <tr>
+                                        <td>
+                                            <span>ПДВ</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="amount_by_group[2]"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr class="border-black">
+                                    <td>
+                                        <strong>Всього</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_total"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <t t-set="sum_text" t-value="o.format_sum_to_text(o.amount_total)"/>
+                    <t t-set="lines_count" t-value="len(o.invoice_line_ids)"/>
+                    <t t-set="vat_text" t-value="o.format_sum_to_text(o._get_tax_amount_by_group()[0][1])"/>
+
+                    <p>Всього найменувань <t t-esc="lines_count"/>, на суму <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></p>
+                    <p class="capitalize"><b><span t-esc="sum_text"/></b></p>
+                    <p><b>У т.ч. ПДВ: <span t-esc="vat_text"/></b></p>
+
+                    <p t-if="o.payment_term_id">
+                        <span t-field="o.payment_term_id.note"/>
+                    </p>
+
+                    <p t-if="o.comment">
+                        <strong>Коментарі:</strong>
+                        <span t-field="o.comment"/>
+                    </p>
+                    <hr/>
+                    <div class="col-xs-6 pull-right">
+                        Виписав  <t t-if="o.user_id">   <u t-field="o.user_id"/></t><t t-if="not o.user_id">_______________________</t></div>
+                </div>
+            </t>
+        </template>
+
+        <template id="report_invoice_ua_1c">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="l10n_ua_invoice_report_1c.report_invoice_ua_1c_document" t-lang="o.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

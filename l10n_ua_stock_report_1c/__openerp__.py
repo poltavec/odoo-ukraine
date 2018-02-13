@@ -23,5 +23,5 @@
             'data/stock_report.xml'
         ],
     'installable': True,
-    'application': True,
+    'application': False,
 }
