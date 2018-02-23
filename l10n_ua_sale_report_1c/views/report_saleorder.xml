@@ -17,7 +17,6 @@
                 </style>
                 <div class="page">
                     <div class="oe_structure"/>
-
                     <h2>
                         <span t-if="doc.state not in ['draft','sent']">Видаткова накладна №</span>
                         <span t-if="doc.state in ['draft','sent']">Пропозиція покупцю №</span>
@@ -50,6 +49,11 @@
                                 <div t-field="doc.partner_id"
                                     t-field-options='{"widget": "contact", "fields": ["name", "address", "phone"], "no_marker": true, "phone_icons": true}' />
                             </span>
+                            <span t-if="not ('company_registry' in doc.partner_id.fields_get() and doc.partner_id.company_registry)">
+                                <span t-field="doc.partner_id.name"></span>
+                                <div t-field="doc.partner_id"
+                                    t-field-options='{"widget": "contact", "fields": ["name", "address", "phone"], "no_marker": true, "phone_icons": true}' />
+                            </span>
                             <div t-if="doc.partner_shipping_id != doc.partner_invoice_id" class="mt8">
                                 <strong>Адреса доставки:</strong>
                                 <address t-field="doc.partner_shipping_id"
@@ -57,14 +61,11 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
-                    <br/>
                     <div class="row mt32 mb32" id="informations">
                         <div t-if="doc.state not in ['draft','sent'] and doc.validity_date" class="col-xs-3">
                             <strong>Дійсний до:</strong>
                             <p t-field="doc.validity_date"/>
                         </div>
-
                         <div t-if="doc.state in ['draft','sent'] and doc.client_order_ref" class="col-xs-3">
                             <strong>Номер документу у клієнта:</strong>
                             <p t-field="doc.client_order_ref"/>
@@ -128,6 +129,7 @@
                     </table>
 
                     <div class="row" name="total">
+                        <!-- Table with totals -->
                         <div class="col-xs-5 pull-right">
                             <table class="table">
                                 <tr class="border-black">
@@ -153,30 +155,42 @@
                                 </tr>
                             </table>
                         </div>
-                    </div>
+                        <!-- Totals in hand-typing mode -->
+                        <div class="col-xs-7 pull-left">
+                            <t t-set="sum_text" t-value="doc.format_sum_to_text(doc.amount_total)"/>
+                            <t t-set="lines_count" t-value="len(doc.order_line)"/>
+                            <t t-set="vat_text" t-value="doc.format_sum_to_text(doc.amount_tax)"/>
 
-                    <t t-set="sum_text" t-value="doc.format_sum_to_text(doc.amount_total)"/>
-                    <t t-set="lines_count" t-value="len(doc.order_line)"/>
-                    <t t-set="vat_text" t-value="doc.format_sum_to_text(doc.amount_tax)"/>
-
-                    <p>Всього найменувань <t t-esc="lines_count"/>, на суму <span t-field="doc.amount_total" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/></p>
-                    <p class="capitalize"><b><span t-esc="sum_text"/></b></p>
-                    <p><b>У т.ч. ПДВ: <span t-esc="vat_text"/></b></p>
-
-
-                    <p t-field="doc.note" />
-                    <p t-if="doc.payment_term_id.note">
-                        <span t-field="doc.payment_term_id.note"/>
-                    </p>
-                    <p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
-                        <span t-field="doc.partner_id.property_payment_term_id.note"/>
-                    </p>
-                    <div class="row">
-                        <div class="col-xs-2">Місце складання</div>
-                        <div class="col-xs-8">
-                            <span t-field="doc.location_signed_in"/>
+                            <p>Всього найменувань<t t-esc="lines_count"/>, на суму
+                                <span t-field="doc.amount_total"
+                                      t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </p>
+                            <p class="capitalize">
+                                <b>
+                                    <span t-esc="sum_text"/>
+                                </b>
+                            </p>
+                            <p>
+                                <b>У т.ч. ПДВ:
+                                    <span t-esc="vat_text"/>
+                                </b>
+                            </p>
+                            <p t-field="doc.note"/>
+                            <p t-if="doc.payment_term_id.note">
+                                <span t-field="doc.payment_term_id.note"/>
+                            </p>
+                            <p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
+                                <span t-field="doc.partner_id.property_payment_term_id.note"/>
+                            </p>
+                            <div class="row">
+                                <div class="col-xs-2">Місце складання</div>
+                                <div class="col-xs-8">
+                                    <span t-field="doc.location_signed_in"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                     <div class="oe_structure"/>
                     <hr class="fat"></hr>
                     <div class="row mt32">
@@ -193,7 +207,7 @@
                             <span>Отримав(ла):</span><br/>
                             <span>______________________________</span><br/>
                             <span t-if="doc.state not in ['draft','sent'] and doc.user_id.name">
-                                <strong><p t-field="doc.user_id"/></strong><br/>
+                                <strong><p t-field="doc.partner_id.name"/></strong><br/>
                                 <p><small>За довіреністю  № _______ від ________</small></p>
                             </span>
                         </div>

@@ -97,7 +97,7 @@
                                     </td>
                                     <td class="text-right">
                                         <span t-field="l.price_subtotal"
-                                            t-field-options='{"widget": "monetary", "display_currency": "doc.currency_id"}'/>
+                                            t-field-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         <br/>
                                         <span style="font-size: 6.5pt;" t-esc="', '.join(map(lambda x: x.name, l.taxes_id))"/>
                                     </td>
@@ -106,33 +106,61 @@
                         </tbody>
                     </table>
 
-                    <div class="row" name="total">
-                        <div class="col-xs-3 pull-right">
+                      <div class="row" name="total">
+                        <div class="col-xs-5 pull-right">
                             <table class="table">
                                 <tr class="border-black">
                                     <td><strong>Всього без ПДВ</strong></td>
                                     <td width="100" class="text-right">
                                         <span t-field="doc.amount_untaxed"
-                                            t-field-options='{"widget": "monetary", "display_currency": "doc.currency_id"}'/>
+                                            t-field-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>ПДВ</td>
                                     <td class="text-right">
                                         <span t-field="doc.amount_tax"
-                                            t-field-options='{"widget": "monetary", "display_currency": "doc.currency_id"}'/>
+                                            t-field-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                                 <tr class="border-black">
                                     <td><strong>Всього:</strong></td>
                                     <td class="text-right">
                                         <span t-field="doc.amount_total"
-                                            t-field-options='{"widget": "monetary", "display_currency": "doc.currency_id"}'/>
+                                            t-field-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                             </table>
                         </div>
+                        <!-- Totals in hand-typing mode -->
+                        <div class="col-xs-7 pull-left">
+                            <t t-set="sum_text" t-value="doc.format_sum_to_text(doc.amount_total)"/>
+                            <t t-set="lines_count" t-value="len(doc.order_line)"/>
+                            <t t-set="vat_text" t-value="doc.format_sum_to_text(doc.amount_tax)"/>
+
+                            <p>Всього найменувань: <b><t t-esc="lines_count"/></b>, на суму
+                                <span t-field="doc.amount_total"
+                                      t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                            </p>
+                            <p class="capitalize">
+                                <b>
+                                    <span t-esc="sum_text"/>
+                                </b>
+                            </p>
+                            <p>
+                                <b>У т.ч. ПДВ:
+                                    <span t-esc="vat_text"/>
+                                </b>
+                            </p>
+                            <p t-if="doc.payment_term_id.note">
+                                <span t-field="doc.payment_term_id.note"/>
+                            </p>
+                            <p t-if="not doc.payment_term_id and doc.partner_id.property_payment_term_id">
+                                <span t-field="doc.partner_id.property_payment_term_id.note"/>
+                            </p>
+                        </div>
                     </div>
+
 
                     <div class="oe_structure"/>
                     <hr class="fat"></hr>
