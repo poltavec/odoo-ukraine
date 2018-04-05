@@ -31,8 +31,10 @@
                             <u>Постачальник:</u>
                         </div>
                         <div class="col-xs-8">
-                            <strong>Юр.адрес:</strong>
-                            ЄДРПОУ <span t-field="doc.company_id.company_registry"/>
+                            <div t-if="doc.company_id.company_registry">
+                                <strong>Юр.адрес:</strong>
+                                ЄДРПОУ <span t-field="doc.company_id.company_registry"/>
+                            </div>
                             <address t-field="doc.company_id.partner_id"
                                 t-field-options='{"widget": "contact", "fields": ["name", "address", "phone"], "no_marker": true, "phone_icons": true}' />
                         </div>
@@ -44,8 +46,10 @@
                         </div>
                         <div class="col-xs-8">
                             <span t-if="'company_registry' in doc.partner_id.fields_get() and doc.partner_id.company_registry">
-                                <strong>Юр.адрес:</strong>
-                                ЄДРПОУ<span t-field="doc.partner_id.company_registry"></span>
+                                <div t-if="doc.partner_id.company_registry">
+                                    <strong>Юр.адрес:</strong>
+                                    ЄДРПОУ<span t-field="doc.partner_id.company_registry"></span>
+                                </div>
                                 <div t-field="doc.partner_id"
                                     t-field-options='{"widget": "contact", "fields": ["name", "address", "phone"], "no_marker": true, "phone_icons": true}' />
                             </span>
@@ -183,8 +187,8 @@
                                 <span t-field="doc.partner_id.property_payment_term_id.note"/>
                             </p>
                             <div class="row">
-                                <div class="col-xs-2">Місце складання</div>
-                                <div class="col-xs-8">
+                                <div class="col-xs-4">Місце складання</div>
+                                <div class="col-xs-6">
                                     <span t-field="doc.location_signed_in"/>
                                 </div>
                             </div>
