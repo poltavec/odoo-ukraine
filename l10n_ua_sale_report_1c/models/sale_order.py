@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, _
-from tools.number_to_text import decimal2text
+from .tools.number_to_text import decimal2text
 
 
 class SaleOrder(models.Model):
